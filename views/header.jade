@@ -1,0 +1,35 @@
+meta(charset='utf-8')
+meta(name='viewport', content='width=device-width')
+title CaffeineCoder
+link(rel='stylesheet', href='/css/foundation.css')
+link(rel='stylesheet/less', type="text/css", href='/css/main.less')
+// link(rel='stylesheet', href='/css/main.min.css')
+// 3rd Party Scripts
+script(src='/3rd/vendor/custom.modernizr.js')
+script(type='text/javascript', src='/socket.io/socket.io.js')
+script(type='text/javascript', src='/3rd/jquery-2.0.3.min.js')
+script(type='text/javascript', src='/3rd/jquery-ui-1.10.3.custom.min.js')
+script(type='text/javascript', src='/3rd/prefixfree.min.js')
+script(type='text/javascript', src='/3rd/prefixfree.jquery.js')
+script(type='text/javascript', src='/3rd/prefixfree.dynamic-dom.min.js')
+script(type='text/javascript', src='/3rd/knockout-2.2.1.js')
+script(type='text/javascript', src='/3rd/jquery.ui.touch-punch.min.js')
+script(type='text/javascript')
+    less = {
+        env: "development", // or "production"
+        async: false,       // load imports async
+        fileAsync: false,   // load imports async when in a page under
+        // a file protocol
+        poll: 1000,         // when in watch mode, time in ms between polls
+        functions: {},      // user functions, keyed by name
+        dumpLineNumbers: "comments", // or "mediaQuery" or "all"
+        relativeUrls: false,// whether to adjust url's to be relative
+        // if false, url's are already relative to the
+        // entry less file
+        rootpath: ":/a.com/"// a path to add on to the start of every url
+        //resource
+    };
+script(type='text/javascript', src='/3rd/less-1.4.1.min.js')
+script(type='text/javascript', src='http://code.highcharts.com/highcharts.js')
+// My Scripts
+script(type='text/javascript', src='/scripts/main.js')

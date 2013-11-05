@@ -1,0 +1,31 @@
+!!! 5
+//if IE 8
+    html.no-js.lt-ie9(lang='en')
+//[if gt IE 8]><!
+html.no-js(lang='en')
+    //<![end if]
+    head
+        include header
+    body
+        .row
+            .large-6.columns
+                h2 CaffeineCoder
+            .large-6.columns
+                h4 Caffeine or Beer?
+                #logButtons
+            hr
+        .row
+            .large-4.columns
+                .row
+                    h5 Today
+                    #todaysEvents
+                .row
+                    h5 Previous Days
+                    #allEvents
+            .large-8.columns
+                #todaysChart
+        #errorModal.reveal-modal
+            h2.errorHeading Error
+            p.errorDescription
+            a.close-reveal-modal &#215;
+        include footer
