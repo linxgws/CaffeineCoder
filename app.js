@@ -36,10 +36,12 @@ function execute(command, callback){
     exec(command, function(error, stdout, stderr){ callback(stdout); });
 };
 
+var repositories = [{location: '/Library/WebServer/Documents/web/icracked/website/', id: 1}, {location: '/Library/WebServer/Documents/web/CaffeineCoder/', id: 2}]
+
 
 // Find all the branches in icracked, insert new ones if found
-function setBranches() {
-    execute('(cd /Library/WebServer/Documents/web/icracked/website/; git branch)', function(output) {
+function setBranches(repositoryLocation, repositoryID) {
+    execute('(cd ' + repositoryLocation + '; git branch)', function(output) {
         var branches = [];
         var lines = output.split(/\n/);
         for (var i=0; i < lines.length; i++) {
@@ -51,7 +53,7 @@ function setBranches() {
         
         
         for(var j=0; j<branches.length; j++) {
-            var query = 'INSERT INTO caffeinecoder.branches (repository_id, branch_name) VALUES (1, \'' + branches[j] + '\')';
+            var query = 'INSERT INTO caffeinecoder.branches (repository_id, branch_name) VALUES (' + repositoryID + ', \'' + branches[j] + '\')';
             
             connection.query(query, function(err, rows, fields) {
                 if (err) { console.log(err); }
@@ -60,25 +62,25 @@ function setBranches() {
                 }
             });
         }
-        setLines(branches);
+        setLines(repositoryLocation, repositoryID, branches);
     });
 };
 
-function setLines(branches) {
+function setLines(repositoryLocation, repositoryID, branches) {
     for(var i=0; i<branches.length; i++) {
-         setLinesForBranch(branches[i]);
-         setTotalLinesForBranch(branches[i]);
+         setLinesForBranch(repositoryLocation, repositoryID, branches[i]);
+         setTotalLinesForBranch(repositoryLocation, repositoryID, branches[i]);
     }
 }
 
-function setLinesForBranch(branch_name, callback) {
+function setLinesForBranch(repositoryLocation, repositoryID, branch_name, callback) {
     var currentDatetime = new Date(); 
-    var lastMin = (currentDatetime.getMonth()+1) + '/'
+    var lastHour = (currentDatetime.getMonth()+1) + '/'
                 + currentDatetime.getDate() + '/'
                 + currentDatetime.getFullYear() + ' '
-                + currentDatetime.getHours() + ":"  
-                + (currentDatetime.getMinutes()-1);
-    var executeStatement = '(cd /Library/WebServer/Documents/Web/icracked/website; git log --since="' + lastMin + '" --author="Nick Carson" --format=format: --numstat ' + branch_name + ')';
+                + currentDatetime.getHours()-1 + ":"  
+                + (currentDatetime.getMinutes());
+    var executeStatement = '(cd ' + repositoryID + '; git log --since="' + lastHour + '" --author="Nick Carson" --format=format: --numstat ' + branch_name + ')';
     console.log(executeStatement);
     execute(executeStatement, function(output) {
         var additions = 0;
@@ -100,7 +102,7 @@ function setLinesForBranch(branch_name, callback) {
             additions = additions + changes[k][0];
             deletions = deletions + changes[k][1];
         }
-        var query = 'INSERT INTO caffeinecoder.code_lines_hourly (user_id, branch_id, lines_added, lines_deleted, date_created) VALUES (1, (SELECT branch_id FROM caffeinecoder.branches WHERE repository_id = 1 AND branch_name = \'' + branch_name + '\'), ' + additions + ', ' + deletions + ', NOW() )';
+        var query = 'INSERT INTO caffeinecoder.code_lines_hourly (user_id, branch_id, lines_added, lines_deleted, date_created) VALUES (1, (SELECT branch_id FROM caffeinecoder.branches WHERE repository_id = ' + repositoryID + ' AND branch_name = \'' + branch_name + '\'), ' + additions + ', ' + deletions + ', NOW() )';
             
         connection.query(query, function(err, rows, fields) {
             if (err) { console.log(err); }
@@ -111,14 +113,9 @@ function setLinesForBranch(branch_name, callback) {
     });
 }
 
-function setTotalLinesForBranch(branch_name, callback) {
+function setTotalLinesForBranch(repositoryLocation, repositoryID, branch_name, callback) {
     var currentDatetime = new Date(); 
-    var lastMin = (currentDatetime.getMonth()+1) + '/'
-                + currentDatetime.getDate() + '/'
-                + currentDatetime.getFullYear() + ' '
-                + currentDatetime.getHours() + ":"  
-                + (currentDatetime.getMinutes()-1);
-    var executeStatement = '(cd /Library/WebServer/Documents/Web/icracked/website; git log --author="Nick Carson" --format=format: --numstat ' + branch_name + ')';
+    var executeStatement = '(cd ' + repositoryID + '; git log --author="Nick Carson" --format=format: --numstat ' + branch_name + ')';
     console.log(executeStatement);
     execute(executeStatement, function(output) {
         var additions = 0;
@@ -140,7 +137,7 @@ function setTotalLinesForBranch(branch_name, callback) {
             additions = additions + changes[k][0];
             deletions = deletions + changes[k][1];
         }
-        var query = 'INSERT INTO caffeinecoder.code_lines_total (user_id, branch_id, lines_added, lines_deleted, date_created) VALUES (1, (SELECT branch_id FROM caffeinecoder.branches WHERE repository_id = 1 AND branch_name = \'' + branch_name + '\'), ' + additions + ', ' + deletions + ', NOW() )';
+        var query = 'INSERT INTO caffeinecoder.code_lines_total (user_id, branch_id, lines_added, lines_deleted, date_created) VALUES (1, (SELECT branch_id FROM caffeinecoder.branches WHERE repository_id = ' + repositoryID + ' AND branch_name = \'' + branch_name + '\'), ' + additions + ', ' + deletions + ', NOW() )';
             
         connection.query(query, function(err, rows, fields) {
             if (err) { console.log(err); }
@@ -154,10 +151,12 @@ function setTotalLinesForBranch(branch_name, callback) {
 setInterval(function() {
     var currentDatetime = new Date(); 
 
-    if( currentDatetime.getSeconds() == 0) {
-        setBranches();
+    if( currentDatetime.getMinutes() == 0) {
+        for(var i=0; i<repositories.length; i++) {
+            setBranches(repositories[i].location, repositories[i].id );
+        }
     }
-}, 1000);
+}, 60*1000);
 
 io.sockets.on('connection', function (socket) {
     function getSendAllEvents() {
