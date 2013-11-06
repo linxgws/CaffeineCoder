@@ -75,12 +75,22 @@ function setLines(repositoryLocation, repositoryID, branches) {
 
 function setLinesForBranch(repositoryLocation, repositoryID, branch_name, callback) {
     var currentDatetime = new Date(); 
-    var lastHour = (currentDatetime.getMonth()+1) + '/'
-                + currentDatetime.getDate() + '/'
-                + currentDatetime.getFullYear() + ' '
-                + currentDatetime.getHours()-1 + ":"  
-                + (currentDatetime.getMinutes());
-    var executeStatement = '(cd ' + repositoryID + '; git log --since="' + lastHour + '" --author="Nick Carson" --format=format: --numstat ' + branch_name + ')';
+    
+    if(currentDatetime.getHours() == 0) {
+        var lastHour = (currentDatetime.getMonth()+1) + '/'
+                        + (currentDatetime.getDate()-1) + '/'
+                        + currentDatetime.getFullYear() + ' '
+                        + 23 + ":"  
+                        + currentDatetime.getMinutes();
+    } else {
+        var lastHour = (currentDatetime.getMonth()+1) + '/'
+                        + currentDatetime.getDate() + '/'
+                        + currentDatetime.getFullYear() + ' '
+                        + (currentDatetime.getHours()-1) + ":"  
+                        + currentDatetime.getMinutes();
+    }
+    
+    var executeStatement = '(cd ' + repositoryLocation + '; git log --since="' + lastHour + '" --author="Nick Carson" --format=format: --numstat ' + branch_name + ')';
     console.log(executeStatement);
     execute(executeStatement, function(output) {
         var additions = 0;
@@ -115,7 +125,7 @@ function setLinesForBranch(repositoryLocation, repositoryID, branch_name, callba
 
 function setTotalLinesForBranch(repositoryLocation, repositoryID, branch_name, callback) {
     var currentDatetime = new Date(); 
-    var executeStatement = '(cd ' + repositoryID + '; git log --author="Nick Carson" --format=format: --numstat ' + branch_name + ')';
+    var executeStatement = '(cd ' + repositoryLocation + '; git log --author="Nick Carson" --format=format: --numstat ' + branch_name + ')';
     console.log(executeStatement);
     execute(executeStatement, function(output) {
         var additions = 0;

@@ -30,7 +30,7 @@ function makeCharts() {
         },
         xAxis: {
             type: 'datetime',
-            tickPixelInterval: 24,
+            tickPixelInterval: 48,
             tickinterval: 24 * 3600 * 1000,
             maxZoom: 24 * 3600 * 1000,
             dateTimeLabelFormats: {
